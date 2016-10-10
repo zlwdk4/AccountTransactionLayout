@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,13 +23,28 @@ public class AccountTransactionLayout extends JFrame {
 	private String[] columnNames = {"Account ID",
             "Account Name",
             "Balance"};
+	
+	private Object[][] data; 
+	
+	//private ArrayList<AccountEntry> dbData = new mysqlHelper().getData();
+	
+	/**
 	private Object[][] data = {
 			{new Integer(3), "Savings", new Integer(500)},
 			{new Integer(4), "Checking", new Integer(270)}};
-	
-	public AccountTransactionLayout() {
+	**/
+	public AccountTransactionLayout(ArrayList<AccountEntry> entries) {
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new GridBagLayout());
+		
+		Object[][] data = {
+				{entries.get(0).getAccount_id() , entries.get(0).getAccount_name() , entries.get(0).getAccount_balance()},
+				{entries.get(1).getAccount_id() , entries.get(1).getAccount_name() , entries.get(1).getAccount_balance()},
+				{entries.get(2).getAccount_id() , entries.get(2).getAccount_name() , entries.get(2).getAccount_balance()},
+				{entries.get(3).getAccount_id() , entries.get(3).getAccount_name() , entries.get(3).getAccount_balance()}
+		};
+		
+		
 		
 		DefaultTableModel dtm = new DefaultTableModel(data,columnNames);
 		table = new JTable(dtm);
@@ -126,12 +142,34 @@ public class AccountTransactionLayout extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Object[][] newData = {
+				/**Object[][] newData = {
 						{new Integer(3), "Savings", new Integer(400)},
 						{new Integer(4), "Checking", new Integer(370)}};
+						**/
 				// Example of how to change the table model of an
 				//   existing JTable
-				table.setModel(new DefaultTableModel(newData,columnNames));
+				int toNum, fromNum, amount, toBal, fromBal;
+				toNum = Integer.parseInt(toField.getText());
+				fromNum = Integer.parseInt(fromField.getText());
+				amount = Integer.parseInt(amountField.getText());
+				
+				
+				toBal = (int) data[toNum - 1][2];
+				fromBal = (int) data[fromNum - 1][2];
+				if(fromBal - amount >= 0){
+					entries.get(toNum - 1).setAccount_balance(toBal + amount);
+					entries.get(fromNum - 1).setAccount_balance(fromBal - amount);
+					mysqlHelper.updateAll(entries);
+				}
+				
+				Object[][] data = {
+						{entries.get(0).getAccount_id() , entries.get(0).getAccount_name() , entries.get(0).getAccount_balance()},
+						{entries.get(1).getAccount_id() , entries.get(1).getAccount_name() , entries.get(1).getAccount_balance()},
+						{entries.get(2).getAccount_id() , entries.get(2).getAccount_name() , entries.get(2).getAccount_balance()},
+						{entries.get(3).getAccount_id() , entries.get(3).getAccount_name() , entries.get(3).getAccount_balance()}
+				};
+				
+				table.setModel(new DefaultTableModel(data,columnNames));
 				
 			}
 			
@@ -140,13 +178,14 @@ public class AccountTransactionLayout extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		JFrame frame = new AccountTransactionLayout();
-		frame.pack();
-		frame.setVisible(true);
+		
 		
 		try {
 			mysqlHelper helper = new mysqlHelper();
-			helper.getData();
+			ArrayList<AccountEntry> theData = helper.getData();
+			JFrame frame = new AccountTransactionLayout(theData);
+			frame.pack();
+			frame.setVisible(true);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			System.out.println("helper failed");

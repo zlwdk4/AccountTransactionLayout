@@ -103,6 +103,31 @@ public class mysqlHelper {
         //stmt.close();
         //con.close();
     }
+
+	public static void updateAll(ArrayList<AccountEntry> entries) {
+		// TODO Auto-generated method stub
+		
+		for(int i = 1; i <5; i++){
+			Connection con = getConnection();
+			Statement stmt;
+			try {
+				stmt = con.createStatement();
+				String updateQuery = "UPDATE Account SET account_balance=" + Integer.toString(entries.get(i - 1).getAccount_balance()) + 
+						" WHERE account_id="+Integer.toString(i);
+				stmt.executeUpdate(updateQuery);
+				con.close();
+				stmt.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		
+		}
+		
+		
+		
+	}
 	
 	
 }
